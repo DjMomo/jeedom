@@ -173,6 +173,7 @@ class market {
     }
 
     public static function getInfo($_logicalId) {
+       
         $return = array();
         if ($_logicalId == '' || config::byKey('market::address') == '') {
             $return['market'] = 0;
