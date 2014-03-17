@@ -46,13 +46,39 @@ class object {
         return DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, __CLASS__);
     }
 
-    public static function rootObject() {
+    public static function rootObject($_all = false) {
         $sql = 'SELECT ' . DB::buildField(__CLASS__) . '
                 FROM object
                 WHERE father_id IS NULL
-                ORDER BY name
-                LIMIT 1';
-        return DB::Prepare($sql, array(), DB::FETCH_TYPE_ROW, PDO::FETCH_CLASS, __CLASS__);
+                ORDER BY name';
+        if($_all === false){
+           $sql .= ' LIMIT 1';
+           return DB::Prepare($sql, array(), DB::FETCH_TYPE_ROW, PDO::FETCH_CLASS, __CLASS__);
+        }
+        return DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, __CLASS__);
+    }
+
+    public static function buildTree($_object = null) {
+        $return = array();
+        if ($_object == null) {
+            $object_list = self::rootObject(true);
+        } else {
+            if (is_object($_object)) {
+                $object_list = $_object->getChild();
+            } else {
+                return array();
+            }
+        }
+        foreach ($object_list as $object) {
+            if (is_object($object)) {
+                $return[] = $object;
+                $childs = self::buildTree($object);
+                if (count($childs) > 0) {
+                    $return = array_merge($return,$childs);
+                }
+            }
+        }
+        return $return;
     }
 
     /*     * *********************Methode d'instance************************* */
