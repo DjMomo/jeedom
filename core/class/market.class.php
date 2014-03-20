@@ -309,6 +309,10 @@ class market {
     }
 
     public function install() {
+        $cache = cache::byKey('market::info::' . $this->getLogicalId());
+        if (is_object($cache)) {
+            $cache->remove();
+        }
         $tmp_dir = dirname(__FILE__) . '/../../tmp';
         $tmp = $tmp_dir . '/' . $this->getLogicalId() . '.zip';
         if (!is_writable($tmp_dir)) {
@@ -357,6 +361,10 @@ class market {
     }
 
     public function remove() {
+        $cache = cache::byKey('market::info::' . $this->getLogicalId());
+        if (is_object($cache)) {
+            $cache->remove();
+        }
         switch ($this->getType()) {
             case 'plugin' :
                 $cibDir = dirname(__FILE__) . '/../../plugins/' . $this->getLogicalId();
