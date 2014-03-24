@@ -45,9 +45,8 @@ if (!is_array($objects)) {
 
     <div class="col-lg-8">
 
-        <center>
+        <div style="position: fixed;width: 100%;z-index: 9999;top : 50px;left : 35%">
             <div class="btn-group">
-
                 <?php
                 if (init('category', 'all') == 'all') {
                     echo '<a type="button" href="index.php?v=d&p=dashboard&object_id=' . init('object_id') . '&category=all" class="btn btn-primary categoryAction">Toutes</a>';
@@ -63,7 +62,8 @@ if (!is_array($objects)) {
                 }
                 ?>
             </div>
-        </center>
+        </div>
+        <div style="height: 10px;width: 100%;"></div>
 
 
         <?php
