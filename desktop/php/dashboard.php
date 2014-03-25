@@ -45,13 +45,13 @@ if (!is_array($objects)) {
 
     <div class="col-lg-8">
 
-        <div style="position: fixed;width: 100%;z-index: 9999;top : 50px;left : 35%">
-            <div class="btn-group">
+        <div style="position: fixed;width: 100%;z-index: 1029;top : 50px;left : 35%">
+            <div class="btn-group tooltips" title="Filtre sur les catégories d'équipement">
                 <?php
                 if (init('category', 'all') == 'all') {
-                    echo '<a type="button" href="index.php?v=d&p=dashboard&object_id=' . init('object_id') . '&category=all" class="btn btn-primary categoryAction">Toutes</a>';
+                    echo '<a type="button" href="index.php?v=d&p=dashboard&object_id=' . init('object_id') . '&category=all" class="btn btn-primary categoryAction">Tous</a>';
                 } else {
-                    echo '<a type="button" href="index.php?v=d&p=dashboard&object_id=' . init('object_id') . '&category=all" class="btn btn-default categoryAction">Toutes</a>';
+                    echo '<a type="button" href="index.php?v=d&p=dashboard&object_id=' . init('object_id') . '&category=all" class="btn btn-default categoryAction">Tous</a>';
                 }
                 foreach (jeedom::getConfiguration('eqLogic:category') as $key => $value) {
                     if (init('category', 'all') == $key) {
@@ -93,6 +93,13 @@ if (!is_array($objects)) {
     <div class="col-lg-2">
         <legend>Scénarios</legend>
         <?php
+        if (init('object_id') == 'global') {
+            foreach (scenario::byObjectId(null) as $scenario) {
+                if ($scenario->getIsVisible() == 1) {
+                    echo $scenario->toHtml('dashboard');
+                }
+            }
+        }
         foreach ($objects as $object) {
             foreach ($object->getScenario() as $scenario) {
                 if ($scenario->getIsVisible() == 1) {
@@ -101,13 +108,6 @@ if (!is_array($objects)) {
             }
             foreach ($object->getChilds() as $child) {
                 foreach ($child->getScenario() as $scenario) {
-                    if ($scenario->getIsVisible() == 1) {
-                        echo $scenario->toHtml('dashboard');
-                    }
-                }
-            }
-            if (init('object_id') == 'global') {
-                foreach (scenario::byObjectId(null) as $scenario) {
                     if ($scenario->getIsVisible() == 1) {
                         echo $scenario->toHtml('dashboard');
                     }
