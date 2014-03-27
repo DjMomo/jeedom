@@ -1,8 +1,8 @@
-$(function() {
+$(document).on('pagecontainershow',function(){
     printCron();
     $("#bt_refreshCron").on('click', function() {
         printCron();
-        $("#rightpanel").panel().panel("close");
+        $(".rightpanel").panel().panel("close");
     });
 
     $("#table_cron").delegate(".stop", 'click', function() {

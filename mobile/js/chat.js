@@ -18,10 +18,8 @@ chat.client.sendMessage = function(_message) {
     });
 };
 
-$(function() {
-    if (getUrlVars('p') == 'chat' && otherUserId == '') {
-        $("#rightpanel").panel().panel("open");
-    }
+$(document).on('pagecontainershow', function() {
+    $(".rightpanel").panel().panel("open");
 
     $("#messageText").keypress(function(e) {
         if (e.which == 13) {
@@ -38,8 +36,13 @@ $(function() {
     });
 
     $('body').one('nodeJsConnect', function() {
-        chatAdapter = new jeedomChatAdapter();
-        chatAdapter.init(chat, chatInitFinish);
+        if (jeedom.chat.state === false) {
+            chatAdapter = new jeedomChatAdapter();
+            chatAdapter.init(chat, chatInitFinish);
+            jeedom.chat.state = true;
+        }else{
+            chatInitFinish();
+        }
         socket.on('refreshUserList', function(_connectUserList) {
             if (_connectUserList != null) {
                 $.ajax({// fonction permettant de faire de l'ajax
@@ -89,9 +92,9 @@ function printUserList(_userList) {
     for (var i in _userList) {
         if (_userList[i].Id != user_id) {
             if (_userList[i].Status == 1) {
-                ul += '<li><a href="index.php?v=m&p=chat&chat_user_id=' + _userList[i].Id + '" data-ajax="false"><i class="fa fa-circle pull-left"></i>' + _userList[i].Name + '</a></li>';
+                ul += '<li><a href="index.php?v=m&p=chat&chat_user_id=' + _userList[i].Id + '"><i class="fa fa-circle pull-left"></i>' + _userList[i].Name + '</a></li>';
             } else {
-                ul += '<li><a href="index.php?v=m&p=chat&chat_user_id=' + _userList[i].Id + '" data-ajax="false"><i class="fa fa-circle-o"></i>' + _userList[i].Name + '</a></li>';
+                ul += '<li><a href="index.php?v=m&p=chat&chat_user_id=' + _userList[i].Id + '"><i class="fa fa-circle-o"></i>' + _userList[i].Name + '</a></li>';
             }
         }
     }
