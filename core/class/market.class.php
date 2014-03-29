@@ -235,6 +235,7 @@ class market {
                 }
             }
         } catch (Exception $e) {
+            log::add('market', 'debug', 'Erreur market::getinfo : ' . $e->getMessage());
             cache::set('market::info::' . $_logicalId, json_encode($return), 3600);
             $return['status'] = 'ok';
         }
@@ -424,7 +425,7 @@ class market {
         if ($this->getType() == 'plugin') {
             config::save('installVersionDate', date('Y-m-d H:i:s'), $this->getLogicalId());
         } else {
-            config::save($this->getLogicalId() . '::installVersionDate', $this->getDatetime(), $this->getType());
+            config::save($this->getLogicalId() . '::installVersionDate', date('Y-m-d H:i:s'), $this->getType());
         }
     }
 
