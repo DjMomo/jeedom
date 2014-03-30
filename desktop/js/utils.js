@@ -50,7 +50,16 @@ $(function() {
         autoOpen: false,
         modal: true,
         height: (jQuery(window).height() - 150),
-        width: 1000
+        width: 1500,
+        open: function() {
+            if ((jQuery(window).width() - 50) < 1500) {
+                $('#md_modal').dialog({width: jQuery(window).width() - 50});
+            }
+            $("body").css({overflow: 'hidden'})
+        },
+        beforeClose: function(event, ui) {
+            $("body").css({overflow: 'inherit'})
+        }
     });
 
     $("#md_modal").dialog({
@@ -63,6 +72,10 @@ $(function() {
             if ((jQuery(window).width() - 50) < 1500) {
                 $('#md_modal').dialog({width: jQuery(window).width() - 50});
             }
+            $("body").css({overflow: 'hidden'})
+        },
+        beforeClose: function(event, ui) {
+            $("body").css({overflow: 'inherit'})
         }
     });
 
@@ -76,6 +89,10 @@ $(function() {
             if ((jQuery(window).width() - 50) < 1500) {
                 $('#md_modal2').dialog({width: jQuery(window).width() - 50});
             }
+            $("body").css({overflow: 'hidden'})
+        },
+        beforeClose: function(event, ui) {
+            $("body").css({overflow: 'inherit'})
         }
     });
 
@@ -125,11 +142,11 @@ $(function() {
         $('#md_modal2').dialog({title: "Market Jeedom Display"});
         $('#md_modal2').load('index.php?v=d&modal=market.display&type=plugin&logicalId=' + $(this).attr('data-logicalId')).dialog('open');
     });
-    
-    $('body').delegate('.bt_pageHelp','click',function(){
+
+    $('body').delegate('.bt_pageHelp', 'click', function() {
         showHelpModal($(this).attr('data-name'), $(this).attr('data-plugin'));
     });
-    
+
     $(window).bind('beforeunload', function(e) {
         if (modifyWithoutSave) {
             return 'Attention vous quittez une page ayant des données modifiées non sauvegardé. Voulez-vous continuer ?';
@@ -163,11 +180,14 @@ function initTableSorter() {
 }
 
 function showHelpModal(_name, _plugin) {
-    var plugin = '';
     if (init(_plugin) != '' && _plugin != undefined) {
-        plugin = init(_plugin);
+        $('#div_helpWebsite').load('index.php?v=d&modal=help.website&page=doc_plugin_' + _plugin + '.php #primary');
+        $('#div_helpSpe').load('index.php?v=d&plugin=' + _plugin + '&modal=help.' + init(_name));
+    } else {
+        $('#div_helpWebsite').load('index.php?v=d&modal=help.website&page=doc_' + init(_name) + '.php #primary');
+        $('#div_helpSpe').load('index.php?v=d&modal=help.' + init(_name));
     }
-    $('#md_pageHelp').load('index.php?v=d&plugin=' + plugin + '&modal=help.' + init(_name)).dialog('open');
+    $('#md_pageHelp').dialog('open');
 }
 
 function refreshMessageNumber() {
@@ -194,7 +214,7 @@ function refreshMessageNumber() {
 }
 
 function notify(_title, _text, _class_name, _cleanBefore) {
-    if(_title == '' && _text == ''){
+    if (_title == '' && _text == '') {
         return true;
     }
     if (init(_cleanBefore, false)) {
