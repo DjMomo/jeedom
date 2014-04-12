@@ -104,6 +104,19 @@ try {
         ajax::success();
     }
 
+    if (init('action') == 'changeHistoryPoint') {
+        if (!isConnect('admin')) {
+            throw new Exception('401 Unauthorized');
+        }
+        $history = history::byCmdIdDatetime(init('cmd_id'), init('datetime'));
+        if (!is_object($history)) {
+            throw new Exception('Aucun point ne correspond pour l\'historique : ' . init('cmd_id') . ' - ' . init('datetime'));
+        }
+        $history->setValue(init('value', null));
+        $history->save();
+        ajax::success();
+    }
+
     if (init('action') == 'getHistory') {
         $cmd = cmd::byId(init('id'));
         if (!is_object($cmd)) {
@@ -126,17 +139,9 @@ try {
         $return['maxValue'] = '';
         $return['minValue'] = '';
         foreach ($cmd->getHistory($dateStart, $dateEnd) as $history) {
-            if ($cmd->getSubType() != 'binary' && count($data) > 0) {
-                if (($data[count($data) - 1][0] + 7200000) < (floatval(strtotime($history->getDatetime() . " UTC")) * 1000)) {
-                    $info_history = array();
-                    $info_history[] = floatval($data[count($data) - 1][0] + 3600000);
-                    $info_history[] = null;
-                    $data[] = $info_history;
-                }
-            }
             $info_history = array();
             $info_history[] = floatval(strtotime($history->getDatetime() . " UTC")) * 1000;
-            $info_history[] = floatval($history->getValue());
+            $info_history[] = ($history->getValue() === null ) ? null : floatval($history->getValue());
             if ($history->getValue() > $return['maxValue'] || $return['maxValue'] == '') {
                 $return['maxValue'] = $history->getValue();
             }

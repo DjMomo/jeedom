@@ -29,6 +29,31 @@ class history {
 
     /*     * ***********************Methode static*************************** */
 
+    public static function byCmdIdDatetime($_cmd_id, $_datetime) {
+        $values = array(
+            'cmd_id' => $_cmd_id,
+            'datetime' => $_datetime,
+        );
+        $sql = 'SELECT ' . DB::buildField(__CLASS__) . '
+                FROM history
+                WHERE cmd_id=:cmd_id
+                    AND `datetime`=:datetime';
+        $result = DB::Prepare($sql, $values, DB::FETCH_TYPE_ROW, PDO::FETCH_CLASS, __CLASS__);
+        if (!is_object($result)) {
+            $sql = 'SELECT ' . DB::buildField(__CLASS__) . '
+                    FROM historyArch
+                    WHERE cmd_id=:cmd_id
+                        AND `datetime`=:datetime';
+            $result = DB::Prepare($sql, $values, DB::FETCH_TYPE_ROW, PDO::FETCH_CLASS, __CLASS__);
+            if (is_object($result)) {
+                $result->setTableName('historyArch');
+            }
+        } else {
+            $result->setTableName('history');
+        }
+        return $result;
+    }
+
     /**
      * Archive les données de history dans historyArch 
      */
@@ -140,6 +165,39 @@ class history {
                         $oldest = DB::Prepare($sql, $values, DB::FETCH_TYPE_ROW);
                     }
                 }
+            }
+        }
+        self::fillHole();
+    }
+
+    public static function fillHole() {
+        $now = strtotime(date('Y-m-d H:i:s'));
+        $archiveTime = (config::byKey('historyArchiveTime') + 1) * 3600;
+        $packetTime = (config::byKey('historyArchivePackage')) * 3600;
+        $endTime = date('Y-m-d H:i:s', $now - $archiveTime);
+        foreach (cmd::allHistoryCmd() as $cmd) {
+            $prevDatetime = null;
+            $prevValue = 0;
+            foreach ($cmd->getHistory(null, $endTime) as $history) {
+                if ($prevDatetime != null) {
+                    $datetime = strtotime($history->getDatetime());
+                    $prevDatetime = date('Y-m-d H:00:00', strtotime($prevDatetime) + $packetTime);
+                    while (($now - strtotime($prevDatetime) > $archiveTime) && strtotime($prevDatetime) < $datetime) {
+                        $newHistory = new history();
+                        $newHistory->setCmd_id($cmd->getId());
+                        $newHistory->setDatetime($prevDatetime);
+                        if ($cmd->getConfiguration('historyDefaultValue', null) === '#previsous#') {
+                            $newHistory->setValue($prevValue);
+                        } else {
+                            $newHistory->setValue($cmd->getConfiguration('historyDefaultValue', null));
+                        }
+                        $newHistory->setTableName('historyArch');
+                        $newHistory->save();
+                        $prevDatetime = date('Y-m-d H:00:00', strtotime($prevDatetime) + $packetTime);
+                    }
+                }
+                $prevDatetime = $history->getDatetime();
+                $prevValue = $history->getValue();
             }
         }
     }
@@ -265,6 +323,64 @@ class history {
         return DB::Prepare($sql, $values, DB::FETCH_TYPE_ROW);
     }
 
+    public static function getHistoryFromCalcul($_strcalcul, $_dateStart = null, $_dateEnd = null) {
+        $now = strtotime(date('Y-m-d H:i:s'));
+        $archiveTime = (config::byKey('historyArchiveTime') + 1) * 3600;
+        $packetTime = (config::byKey('historyArchivePackage')) * 3600;
+        $test = new evaluate();
+        $value = array();
+        $cmd_histories = array();
+        preg_match_all("/#([0-9]*)#/", $_strcalcul, $matches);
+        if (count($matches[1]) > 0) {
+            foreach ($matches[1] as $cmd_id) {
+                if (is_numeric($cmd_id)) {
+                    $cmd = cmd::byId($cmd_id);
+                    if (is_object($cmd) && $cmd->getIsHistorized() == 1) {
+                        $prevDatetime = null;
+                        $prevValue = 0;
+                        $histories_cmd = $cmd->getHistory($_dateStart, $_dateEnd);
+                        $histories_cmd_count = count($histories_cmd);
+                        for ($i = 0; $i < $histories_cmd_count; $i++) {
+                            if (!isset($cmd_histories[$histories_cmd[$i]->getDatetime()])) {
+                                $cmd_histories[$histories_cmd[$i]->getDatetime()] = array();
+                            }
+                            if (!isset($cmd_histories[$histories_cmd[$i]->getDatetime()]['#' . $cmd_id . '#'])) {
+                                if ($prevDatetime != null) {
+                                    $datetime = strtotime($histories_cmd[$i]->getDatetime());
+                                    while (($now - strtotime($prevDatetime) > $archiveTime) && strtotime($prevDatetime) < $datetime) {
+                                        $prevDatetime = date('Y-m-d H:00:00', strtotime($prevDatetime) + $packetTime);
+                                        $cmd_histories[$prevDatetime]['#' . $cmd_id . '#'] = 0;
+                                    }
+                                    while (($now - strtotime($prevDatetime)) > 300 && strtotime($prevDatetime) < $datetime) {
+                                        $prevDatetime = date('Y-m-d H:i:00', strtotime($prevDatetime) + 300);
+                                        $cmd_histories[$prevDatetime]['#' . $cmd_id . '#'] = $prevValue;
+                                    }
+                                }
+                                $cmd_histories[$histories_cmd[$i]->getDatetime()]['#' . $cmd_id . '#'] = $histories_cmd[$i]->getValue();
+                            }
+                            $prevDatetime = $histories_cmd[$i]->getDatetime();
+                            $prevValue = $histories_cmd[$i]->getValue();
+                        }
+                    }
+                }
+            }
+            foreach ($cmd_histories as $datetime => $cmd_history) {
+                $datetime = floatval(strtotime($datetime . " UTC"));
+                $calcul = template_replace($cmd_history, $_strcalcul);
+
+                try {
+                    $result = floatval($test->Evaluer($calcul));
+                    $value[$datetime] = $result;
+                } catch (Exception $e) {
+                    
+                }
+            }
+        } else {
+            $value = $_strcalcul;
+        }
+        return $value;
+    }
+
     /*     * *********************Methode d'instance************************* */
 
     public function save() {
@@ -339,9 +455,6 @@ class history {
                 $this->setValue(0);
             }
         }
-
-
-
         $values = array(
             'cmd_id' => $this->getCmd_id(),
             'datetime' => $this->getDatetime(),

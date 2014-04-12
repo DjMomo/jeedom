@@ -59,7 +59,7 @@ $plugins_list = plugin::listPlugin();
                 padding: 9px 0;
             }
         </style>
-         <script>
+        <script>
             var clientDatetime = new Date();
             var clientServerDiffDatetime = (<?php echo strtotime(date('Y-m-d H:i:s')); ?> * 1000) - clientDatetime.getTime();
         </script>
@@ -160,7 +160,7 @@ $plugins_list = plugin::listPlugin();
                             <ul class="nav navbar-nav navbar-right">
                                 <?php $displayMessage = (message::nbMessage() > 0) ? '' : 'display : none;'; ?>
                                 <li><a href="index.php?v=d&p=message">
-                                        <span class="label label-danger" id="span_nbMessage" style="<?php echo $displayMessage; ?>">
+                                        <span class="label label-warning" id="span_nbMessage" style="<?php echo $displayMessage; ?>">
                                             <i class="fa fa-envelope"></i> <?php echo message::nbMessage(); ?> message(s)
                                         </span>
                                     </a>
@@ -189,14 +189,19 @@ $plugins_list = plugin::listPlugin();
                                     </ul>
                                 </li>
                                 <li>
-                                    <a class="bt_pageHelp cursor"
+                                    <a class="bt_pageHelp cursor tooltips" title="Aide sur la page en cours"
                                     <?php
                                     echo 'data-name="' . init('p') . '"';
                                     if (isset($plugin) && is_object($plugin)) {
                                         echo 'data-plugin="' . $plugin->getId() . '"';
                                     }
-                                    ?>accesskey="">
+                                    ?>>
                                         <i class="fa fa-question-circle" ></i>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="bt_reportBug cursor tooltips" title="Envoyé un rapport de bugs">
+                                        <i class="fa fa-exclamation-circle" ></i>
                                     </a>
                                 </li>
                             </ul>
@@ -244,6 +249,8 @@ $plugins_list = plugin::listPlugin();
                             <div class="tab-pane" id="div_helpSpe" ></div>
                         </div>
                     </div>
+                    <div id="md_reportBug" title="Ouverture d'un ticket"></div>
+                        
                 </main>
             </div>
         <?php } ?>
@@ -287,7 +294,7 @@ $plugins_list = plugin::listPlugin();
                 ?>
             </span>
         </footer>
-       
+
     </body>
 </html>
 
