@@ -50,14 +50,14 @@ class com_http {
                     sleep(1);
                 } else {
                     if ($_logErrorIfNoResponse) {
-                        log::add('http.com', 'error', 'Erreur curl : ' . curl_error($ch) . ' sur la commande ' . $this->url . ' après ' . $nbRetry . ' relance');
+                        log::add('http.com', 'error', __('Erreur curl : ', __FILE__) . curl_error($ch) . __(' sur la commande ', __FILE__) . $this->url . __(' après ', __FILE__) . $nbRetry . __(' relance(s)', __FILE__));
                     }
-                    throw new Exception('Echec de la requete http : ' . $this->url, 404);
+                    throw new Exception(__('Echec de la requete http : ', __FILE__) . $this->url, 404);
                 }
             }
             curl_close($ch);
         }
-        log::add('http.com', 'Debug', 'Url : ' . $this->url . "\nReponse : " . $response);
+        log::add('http.com', 'Debug', __('Url : ', __FILE__) . $this->url . __("\nReponse : ", __FILE__) . $response);
         return $response;
     }
 

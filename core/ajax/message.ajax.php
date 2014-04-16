@@ -21,7 +21,7 @@ try {
     include_file('core', 'authentification', 'php');
 
     if (!isConnect()) {
-        throw new Exception('401 Non autorisé');
+        throw new Exception(__('401 - Accès non autorisé', __FILE__));
     }
 
     if (init('action') == 'clearMessage') {
@@ -36,13 +36,13 @@ try {
     if (init('action') == 'removeMessage') {
         $message = message::byId(init('id'));
         if (!is_object($message)) {
-            throw new Exception('Message inconnu verifié l\'id');
+            throw new Exception(__('Message inconnu verifié l\'id', __FILE__));
         }
         $message->remove();
         ajax::success();
     }
 
-    throw new Exception('Aucune methode correspondante à : '.init('action'));
+    throw new Exception(__('Aucune methode correspondante à : ',__FILE__). init('action'));
     /*     * *********Catch exeption*************** */
 } catch (Exception $e) {
     ajax::error(displayExeption($e), $e->getCode());

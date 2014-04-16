@@ -29,7 +29,6 @@ $(document).on('pagecontainershow', function() {
         $.hideLoading();
     });
 
-
     if ($('.ui-page-active .rightpanel').length > 0) {
         if (window.innerWidth > 800) {
             setTimeout(function() {
@@ -64,12 +63,6 @@ function refreshMessageNumber() {
                 return;
             }
             $('.ui-page-active #span_nbMessage').html(data.result);
-            $(document).ajaxStart(function() {
-                $.mobile.loading('show', {
-                    text: 'Chargement...',
-                    textVisible: true,
-                });
-            });
         }
     });
 }
@@ -78,8 +71,8 @@ function notify(_title, _text) {
     if (_title == '' && _text == '') {
         return true;
     }
-    $('.ui-page-active #div_alert').html("<center><b>" + _title + "</b></center>" + _text).popup("open", {y: 0});
+    $('#div_alert').html("<center><b>" + _title + "</b></center>" + _text).popup("open", {y: 0});
     setTimeout(function() {
-        $('.ui-page-active #div_alert').popup("close");
+        $('#div_alert').popup("close");
     }, 1000)
 }

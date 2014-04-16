@@ -1,6 +1,6 @@
 <?php
 if (!isConnect()) {
-    throw new Exception('401 - Unauthorized access to page');
+    throw new Exception('{{401 - Accès non autorisé}}');
 }
 $view = null;
 if (init('id') == '') {
@@ -15,7 +15,7 @@ if (init('id') == '') {
     $view = view::byId(init('id'));
 }
 if (!is_object($view)) {
-    throw new Exception('Vue inconnue. Verifier l\'id');
+    throw new Exception('{{Vue inconnue. Verifier l\'id}}');
 }
 
 global $rightPanel;
@@ -26,7 +26,7 @@ foreach (view::all() as $view_info) {
 $rightPanel .= '</ul>';
 ?>
 <div>
-    <legend style="color : #60a725;">Vue <?php echo $view->getName() ?></legend>
+    <legend style="color : #60a725;">{{Vue}} <?php echo $view->getName() ?></legend>
     <?php
     foreach ($view->getviewZone() as $viewZone) {
         echo '<div>';

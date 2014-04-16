@@ -23,7 +23,6 @@ $(function() {
     });
     
     loadProfil();
-    
     $('body').delegate('.userAttr', 'change', function() {
         modifyWithoutSave = true;
     });
@@ -48,7 +47,7 @@ function saveProfils() {
                 $('#div_alert').showAlert({message: data.result, level: 'danger'});
                 return;
             }
-            $('#div_alert').showAlert({message: "Sauvegarde effectuée", level: 'success'});
+            $('#div_alert').showAlert({message: "{{Sauvegarde effectuée}}", level: 'success'});
             loadProfil();
             modifyWithoutSave = false;
         }

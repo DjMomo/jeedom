@@ -36,7 +36,7 @@ if (isset($argv)) {
 
 try {
     require_once dirname(__FILE__) . '/../core/php/core.inc.php';
-    echo "***************Lancement de la restauration de Jeedom***************\n";
+    echo __("***************Lancement de la restauration de Jeedom***************\n", __FILE__);
     global $CONFIG;
     global $BACKUP_FILE;
     if (isset($BACKUP_FILE)) {
@@ -61,10 +61,10 @@ try {
     }
 
     if (!file_exists($backup)) {
-        throw new Exception('Backup non trouvé : ' . $backup);
+        throw new Exception(__('Backup non trouvé : ', __FILE__) . $backup);
     }
 
-    echo "Restauration de Jeedom avec le fichier : " . $backup . "\n";
+    echo __("Restauration de Jeedom avec le fichier : ", __FILE__) . $backup . "\n";
 
 
     $tmp = dirname(__FILE__) . '/../tmp/backup';
@@ -72,26 +72,26 @@ try {
     if (!file_exists($tmp)) {
         mkdir($tmp, 0770, true);
     }
-    echo "Décompression du backup : ";
+    echo __("Décompression du backup : ", __FILE__);
     system('cd ' . $tmp . '; tar xfz ' . $backup . ' ');
     echo "OK\n";
 
     jeedom::stop();
-    echo "Reastauration de la base de données : ";
+    echo __("Reastauration de la base de données : ", __FILE__);
     system("mysql --user=" . $CONFIG['db']['username'] . " --password=" . $CONFIG['db']['password'] . " " . $CONFIG['db']['dbname'] . "  < " . $tmp . "/DB_backup.sql");
     echo "OK\n";
 
-    echo "Reastauration des fichiers : ";
+    echo __("Reastauration des fichiers : ", __FILE__);
     rcopy($tmp, dirname(__FILE__) . '/..', false);
-    echo "OK\n";
+    echo __("OK\n", __FILE__);
 
     jeedom::start();
-    echo "***************Fin de la restoration de Jeedom***************\n";
+    echo __("***************Fin de la restoration de Jeedom***************\n", __FILE__);
     echo "[END RESTORE SUCCESS]\n";
 } catch (Exception $e) {
     jeedom::start();
-    echo 'Erreur durant le backup : ' . $e->getMessage();
-    echo 'Détails : ' . print_r($e->getTrace());
+    echo __('Erreur durant le backup : ', __FILE__) . $e->getMessage();
+    echo __('Détails : ', __FILE__) . print_r($e->getTrace());
     echo "[END RESTORE ERROR]\n";
     throw $e;
 }
